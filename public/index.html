@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>人物图谱 · 日记人物关系管理</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-logo">✦</div>
+    <div>
+      <div class="brand-title">人物图谱</div>
+      <div class="brand-sub">日记 · 人物 · 关系 · AI 问答</div>
+    </div>
+  </div>
+  <nav class="tabs" id="tabs">
+    <button class="tab-btn active" data-tab="graph">🌌 图谱</button>
+    <button class="tab-btn" data-tab="persons">👤 人物</button>
+    <button class="tab-btn" data-tab="diaries">📖 日记</button>
+    <button class="tab-btn" data-tab="chat">🤖 AI 助手</button>
+  </nav>
+  <div class="top-actions">
+    <button class="btn ghost" id="btnExport" title="把全部人物/关系/日记导出为 JSON 文件">⬇ 导出 JSON</button>
+    <button class="btn ghost" id="btnImport" title="从 JSON 文件导入">⬆ 导入</button>
+    <input type="file" id="importFile" accept=".json,application/json" hidden/>
+    <button class="btn ghost" id="btnSettings">⚙ 设置</button>
+  </div>
+</header>
+
+<main>
+  <!-- ================= 图谱 ================= -->
+  <section id="tab-graph" class="tab active">
+    <div class="graph-toolbar">
+      <button class="btn primary" id="btnAddPerson">➕ 添加人物</button>
+      <button class="btn" id="btnConnectMode">🔗 连接模式</button>
+      <span class="hint">🍃 球体会轻轻沉浮 · 拖动球体移动 · 滚轮缩放 · 按住 Alt 从球体拖到另一球体=建立关系 · 点击球体看详情</span>
+    </div>
+    <div class="graph-stage" id="graphStage">
+      <svg id="graphSvg" viewBox="0 0 900 600" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="graph-empty" id="graphEmpty" hidden>
+        <div class="ge-icon">🪐</div>
+        <div>还没有人物，点击「添加人物」开始构建你的关系宇宙</div>
+      </div>
+    </div>
+    <aside class="graph-panel" id="graphPanel" hidden>
+      <div class="gp-header"><span id="gpTitle">详情</span><button class="btn icon" id="gpClose">✕</button></div>
+      <div class="gp-body" id="gpBody"></div>
+    </aside>
+  </section>
+
+  <!-- ================= 人物 ================= -->
+  <section id="tab-persons" class="tab">
+    <div class="persons-toolbar">
+      <input class="search" id="personSearch" placeholder="🔍 搜索人物（姓名 / 标签 / 职业）…"/>
+      <button class="btn primary" id="btnAddPerson2">➕ 添加人物</button>
+    </div>
+    <div class="persons-grid" id="personsGrid"></div>
+  </section>
+
+  <!-- ================= 日记 ================= -->
+  <section id="tab-diaries" class="tab">
+    <div class="diaries-layout">
+      <div class="diary-list-col">
+        <div class="diaries-toolbar">
+          <h2>📖 日记</h2>
+          <button class="btn primary" id="btnAddDiary">✏️ 写日记</button>
+        </div>
+        <div class="diary-list" id="diaryList"></div>
+      </div>
+      <div class="diary-editor-col">
+        <div class="diary-editor" id="diaryEditor" hidden>
+          <div class="de-row">
+            <input type="date" id="dDate"/>
+            <input type="text" id="dTitle" placeholder="标题…"/>
+          </div>
+          <textarea id="dContent" placeholder="写下今天发生的事…（提到的人会自动检测，保存时记录关联）"></textarea>
+          <div class="de-mentions">
+            <span class="de-label">提到的人物：</span>
+            <div class="mention-chips" id="mentionChips"></div>
+          </div>
+          <div class="de-actions">
+            <button class="btn primary" id="btnSaveDiary">💾 保存日记</button>
+            <button class="btn ghost" id="btnCancelDiary">取消</button>
+          </div>
+        </div>
+        <div class="empty" id="diaryEditorEmpty">选择左侧一篇日记，或点击「写日记」开始记录<br/><span class="muted">日记中提到的人，会自动进入人物图谱</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= AI 助手 ================= -->
+  <section id="tab-chat" class="tab">
+    <div class="chat-layout">
+      <div class="chat-main">
+        <div class="chat-header">
+          <div>🤖 AI 助手</div>
+          <div class="muted small">每次提问都会自动携带当前完整图谱 JSON（人物 · 关系 · 日记摘录），它知道你笔下的每个人</div>
+        </div>
+        <div class="chat-log" id="chatLog">
+          <div class="chat-bubble chat-ai">
+            <div class="cb-avatar">✦</div>
+            <div class="cb-body"><div class="cb-role">AI 助手</div><div class="cb-text" id="chatWelcome">你好！我是人物图谱助手。你可以问我：<br/>「谁是我的敌人？」「我和苏晚是什么关系？」「帮我梳理陈北的经历」<br/>问答时会自动携带全部人物、关系和日记（JSON）作为依据。</div></div>
+          </div>
+        </div>
+        <div class="chat-input-row">
+          <textarea id="chatInput" rows="1" placeholder="问我任何关于你的人物关系的问题…（Enter 发送，Shift+Enter 换行）"></textarea>
+          <button class="btn primary big" id="btnSend">发送 ➤</button>
+        </div>
+      </div>
+      <aside class="chat-side">
+        <h3>⚡ 快捷提问</h3>
+        <div class="quick-list" id="quickList"></div>
+        <h3>📊 数据快照</h3>
+        <div class="stat-box">
+          <div class="stat"><div class="stat-num" id="statPersons">0</div><div class="stat-label">人物</div></div>
+          <div class="stat"><div class="stat-num" id="statRelations">0</div><div class="stat-label">关系</div></div>
+          <div class="stat"><div class="stat-num" id="statDiaries">0</div><div class="stat-label">日记</div></div>
+        </div>
+        <button class="btn ghost block" id="btnViewContext">📄 查看问答携带的 JSON</button>
+        <p class="muted small">AI 根据下方数据回答，不会编造。<br/><span class="muted small">可在「设置」里更换 AI 服务商。</span></p>
+      </aside>
+    </div>
+  </section>
+</main>
+
+<div id="modalRoot"></div>
+<div id="toastRoot"></div>
+
+<script src="js/api.js"></script>
+<script src="js/graph.js"></script>
+<script src="js/chat.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

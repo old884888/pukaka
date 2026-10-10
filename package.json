@@ -1,0 +1,13 @@
+{
+  "name": "renwu-tupu",
+  "version": "1.0.0",
+  "description": "人物图谱 · 日记人物关系管理（零依赖本地应用）",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
